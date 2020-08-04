@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
     //a constant for detecting the login intent result
     private static final int RC_SIGN_IN = 234;
 
-    final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference ref = database.getReference("server/saving-data/fireblog");
     //Tag for the logs optional
     private static final String TAG = "medapp";
 
