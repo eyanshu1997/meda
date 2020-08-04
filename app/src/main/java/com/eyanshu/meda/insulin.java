@@ -4,11 +4,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class insulin {
-    String user;
+   // String user;
 
-    public insulin(String user, int value) {
-        this.user = user;
-        Value = value;
+    public insulin( String value) {
+        //this.user = user;
+        Value = Integer.parseInt(value);
         Date currentTime = Calendar.getInstance().getTime();
         time=currentTime.toString();
     }
@@ -16,13 +16,13 @@ public class insulin {
     String time;
     int Value;
 
-    public String getUser() {
-        return user;
-    }
+    //public String getUser() {
+    //    return user;
+   // }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+    //public void setUser(String user) {
+       // this.user = user;
+   // }
 
     public String getTime() {
         return time;

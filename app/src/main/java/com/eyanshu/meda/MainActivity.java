@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         //and take the user to profile activity
         if (mAuth.getCurrentUser() != null) {
             //finish();
-            startActivity(new Intent(this, profile.class));
+            startActivity(new Intent(this, pro.class));
             finish();
         }
     }
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
 
                             Toast.makeText(MainActivity.this, "User Signed In", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(MainActivity.this,profile.class));
+                            startActivity(new Intent(MainActivity.this,pro.class));
                             finish();
                         } else {
                             // If sign in fails, display a message to the user.
