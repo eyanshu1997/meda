@@ -1,8 +1,10 @@
 package com.eyanshu.meda;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -72,24 +74,9 @@ public class pro extends AppCompatActivity {
         Glide.with(this).load(user.getPhotoUrl()).into(imageView);
         textName.setText(user.getDisplayName());
         textEmail.setText(user.getEmail());
-        findViewById(R.id.ibutton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addvalue();
-            }
-        });
+
     }
-    public void addvalue()
-    {
-        EditText inval=findViewById(R.id.insulinval);
-        String val=inval.getText().toString();
-       insulin ne=new insulin(val);
-        //Toast.makeText(pro.this, "adding value", Toast.LENGTH_SHORT).show();
-         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference("user");
-        //String x="users";
-        ref.setValue(ne);
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
