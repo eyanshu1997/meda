@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "193260220094",
+    "firebase_url": "https://meda-7f537.firebaseio.com",
+    "project_id": "meda-7f537",
+    "storage_bucket": "meda-7f537.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193260220094:android:c2772f29dd97b0793e78ef",
+        "android_client_info": {
+          "package_name": "com.eyanshu.meda"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "193260220094-bcgo5dgu9vhjjvmbfiu20plsap857mpc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eyanshu.meda",
+            "certificate_hash": "6e4d015509167011b54d51a8c7332f0264f1d52c"
+          }
+        },
+        {
+          "client_id": "193260220094-qslr0j5se16jfm7ktajqv742p5eqeoa2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_cUffmRtvb9Yt6s2Dzvy_pBwbJkZvU-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193260220094-qslr0j5se16jfm7ktajqv742p5eqeoa2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
