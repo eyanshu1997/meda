@@ -36,7 +36,6 @@ public class HomeFragment extends Fragment {
         root.findViewById(R.id.ibutton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 EditText inval=root.findViewById(R.id.insulinval);
                 String val=inval.getText().toString();
                 insulin ne=new insulin(val);
