@@ -2,6 +2,7 @@ package com.eyanshu.meda;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.Menu;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -62,7 +64,7 @@ public class pro extends AppCompatActivity {
 
     FirebaseUser user;
     private AppBarConfiguration mAppBarConfiguration;
-
+    static int set=0;
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private void dispatchTakePictureIntent() {
@@ -71,85 +73,138 @@ public class pro extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
+    private Uri filePath;
+    Bitmap bim;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            //filePath = data.getData();
             Bundle extras = data.getExtras();
             Bitmap bitmap = (Bitmap) extras.get("data");
-            ImageView im=findViewById(R.id.bitmark);
             //im.setImageBitmap(bitmap);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            //im.setImageDrawable(baos);
-            byte[] da = baos.toByteArray();
-            Bitmap bmp = BitmapFactory.decodeByteArray(da, 0, da.length);
-            im.setImageBitmap(bmp);
+            //filePath=Uri.fromFile(new File(photo.getPath()));
 
-            StorageReference ref = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid());
 
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String ifn = "JPEG_" + timeStamp + "_";
-            final File photo=new File(Environment.getExternalStorageDirectory(), ifn+".jpg");
-            if (photo.exists()) {
-                photo.delete();
-            }
-
-            try {
-                //photo.mkdirs();
-                FileOutputStream fos=new FileOutputStream(photo.getPath());
-
-                fos.write(da);
-                fos.close();
-            }
-            catch (java.io.IOException e) {
-                Toast.makeText(pro.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-
-            }
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid()).child("images");
-            StorageReference iref = storageRef;
-            Uri file = Uri.fromFile(new File(photo.getAbsolutePath()));
-            UploadTask uploadTask = iref.putFile(file);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle unsuccessful uploads
-                    Toast.makeText(pro.this, exception.getMessage()+photo.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                    // ...
-                    Toast.makeText(pro.this,"Uploaded", Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-            //  uploadImage();
+              uploadby(bitmap);
         }
+        // then set image in the image view
+        if (requestCode == PICK_IMAGE_REQUEST
+                && resultCode == RESULT_OK
+                && data != null
+                && data.getData() != null) {
+            filePath = data.getData();
+         uploadImage();
+        }
+
     }
-    String currentPhotoPath;
+    private String getFileExtension(Uri uri)
+    {
+        ContentResolver cr=getContentResolver();
+        MimeTypeMap mime=MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cr.getType(uri));
+    }
+    public void uploadby(Bitmap bi)
+    {
+        String name=System.currentTimeMillis() + ".jpg";
+        DatabaseReference dref=FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("images").push();
+        dref.setValue(name);
+        StorageReference rf = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid()).child("images");
+        StorageReference ref = rf.child(name);
+        final ProgressDialog progressDialog
+                = new ProgressDialog(this);
+        progressDialog.setTitle("Uploading...");
+        progressDialog.show();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bi.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+        ref.putBytes(data).addOnSuccessListener(
+                new OnSuccessListener<UploadTask.TaskSnapshot>() {
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+                    @Override
+                    public void onSuccess(
+                            UploadTask.TaskSnapshot taskSnapshot) {
 
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        Toast
-                .makeText(pro.this,
-                        "Image saved!"+currentPhotoPath,
-                        Toast.LENGTH_SHORT).show();
-        return image;
+                        // Image uploaded successfully
+                        // Dismiss dialog
+                        progressDialog.dismiss();
+                        Toast.makeText(pro.this, "Image Uploaded!!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        // Error, Image not uploaded
+                        progressDialog.dismiss();
+                        Toast.makeText(pro.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnProgressListener(
+                        new OnProgressListener<UploadTask.TaskSnapshot>() {
+
+                            @Override
+                            public void onProgress(
+                                    UploadTask.TaskSnapshot taskSnapshot) {
+                                double progress
+                                        = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());progressDialog.setMessage("Uploaded " + (int) progress + "%");
+                            }
+                        });
+
+    }
+    private void uploadImage()
+    {
+        if(filePath!=null) {
+            String name=System.currentTimeMillis() + "." + getFileExtension(filePath);
+            DatabaseReference dref=FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("images").push();
+            dref.setValue(name);
+            StorageReference rf = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid()).child("images");
+            StorageReference ref = rf.child(name);
+            final ProgressDialog progressDialog
+                    = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading...");
+            progressDialog.show();
+
+            ref.putFile(filePath).addOnSuccessListener(
+                    new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+                        @Override
+                        public void onSuccess(
+                                UploadTask.TaskSnapshot taskSnapshot) {
+
+                            // Image uploaded successfully
+                            // Dismiss dialog
+                            progressDialog.dismiss();
+                            Toast.makeText(pro.this, "Image Uploaded!!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            // Error, Image not uploaded
+                            progressDialog.dismiss();
+                            Toast.makeText(pro.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(
+                            new OnProgressListener<UploadTask.TaskSnapshot>() {
+
+                                @Override
+                                public void onProgress(
+                                        UploadTask.TaskSnapshot taskSnapshot) {
+                                    double progress
+                                            = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());progressDialog.setMessage("Uploaded " + (int) progress + "%");
+                                }
+                            });
+        }
+
+        else
+        {
+            Toast.makeText(this,"no file selected",Toast.LENGTH_SHORT).show();
+        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +213,11 @@ public class pro extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton gal = findViewById(R.id.gal);
+        FloatingActionButton cam = findViewById(R.id.cam);
+        cam.hide();
+        gal.hide();
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
@@ -189,11 +249,37 @@ public class pro extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FloatingActionButton fab = findViewById(R.id.fab);
+                FloatingActionButton gal = findViewById(R.id.gal);
+                FloatingActionButton cam = findViewById(R.id.cam);
+                if(set==0) {
+                    cam.show();
+                    gal.show();
+                    //fab.hide();
+                    set=1;
+                }
+                else
+                {
+                    cam.hide();
+                    gal.hide();
+                    //fab.hide();
+                    set=0;
+                }
+            }
+        });
+        cam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 dispatchTakePictureIntent();
             }
         });
-
-
+        gal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            SelectImage();
+            }
+        });
+       // findViewById(R.id.bitmark).setVisibility(View.GONE);
         mAuth=FirebaseAuth.getInstance();
         user= mAuth.getCurrentUser();
 
@@ -218,6 +304,21 @@ public class pro extends AppCompatActivity {
         textName.setText(user.getDisplayName());
         textEmail.setText(user.getEmail());
 
+    }
+    private final int PICK_IMAGE_REQUEST = 22;
+
+    private void SelectImage()
+    {
+
+        // Defining Implicit Intent to mobile gallery
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(
+                Intent.createChooser(
+                        intent,
+                        "Select Image from here..."),
+                PICK_IMAGE_REQUEST);
     }
 
     @Override

@@ -52,4 +52,15 @@
         app:layout_constraintStart_toEndOf="@+id/insulinval"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <Button
+        android:id="@+id/test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="290dp"
+        android:layout_marginBottom="292dp"
+        android:text="test"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/insulinval"
+        tools:layout_editor_absoluteX="142dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

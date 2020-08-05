@@ -17,6 +17,8 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.eyanshu.meda.R;
 import com.eyanshu.meda.insulin;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,9 +46,42 @@ public class HomeFragment extends Fragment {
                 Snackbar.make(view, "uploaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
+        root.findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                test();
+            }
+        });
         return root;
     }
+    private void test()
+    {
+        FirebaseAuth mAuth=FirebaseAuth.getInstance();
 
+        FirebaseUser user=mAuth.getCurrentUser();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference("users").child(user.getUid()).child("test").push();
+        ref.setValue("aasadasdsa").addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                // ..
+                View view=getView();
+                Snackbar.make(view, "uploaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        // ...
+                        View view=getView();
+                        Snackbar.make(view, "uploaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
+                    }
+                });
+    }
     private void closeKeyBoard(){
         View view = getActivity().getCurrentFocus();
         if (view != null){
