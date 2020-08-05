@@ -96,7 +96,12 @@ public class pro extends AppCompatActivity {
             filePath = data.getData();
          uploadImage();
         }
-
+        FloatingActionButton gal = findViewById(R.id.gal);
+        FloatingActionButton cam = findViewById(R.id.cam);
+        cam.hide();
+        gal.hide();
+        //fab.hide();
+        set=0;
     }
     private String getFileExtension(Uri uri)
     {

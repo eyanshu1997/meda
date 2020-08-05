@@ -46,12 +46,7 @@ public class HomeFragment extends Fragment {
                 Snackbar.make(view, "uploaded", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
-        root.findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                test();
-            }
-        });
+
         return root;
     }
     private void test()
