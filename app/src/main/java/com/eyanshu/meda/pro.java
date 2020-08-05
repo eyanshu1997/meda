@@ -1,9 +1,12 @@
 package com.eyanshu.meda;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,6 +36,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -41,7 +46,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,6 +56,8 @@ import java.util.UUID;
 
 public class pro extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 0;
+    private static final int MY_PERMISSIONS_READ_EXTERNAL_STORAGE = 0;
     FirebaseAuth mAuth;
 
     FirebaseUser user;
@@ -67,10 +76,58 @@ public class pro extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            Bitmap bitmap = (Bitmap) extras.get("data");
             ImageView im=findViewById(R.id.bitmark);
-            im.setImageBitmap(imageBitmap);
-          //  uploadImage();
+            //im.setImageBitmap(bitmap);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            //im.setImageDrawable(baos);
+            byte[] da = baos.toByteArray();
+            Bitmap bmp = BitmapFactory.decodeByteArray(da, 0, da.length);
+            im.setImageBitmap(bmp);
+
+            StorageReference ref = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid());
+
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String ifn = "JPEG_" + timeStamp + "_";
+            final File photo=new File(Environment.getExternalStorageDirectory(), ifn+".jpg");
+            if (photo.exists()) {
+                photo.delete();
+            }
+
+            try {
+                //photo.mkdirs();
+                FileOutputStream fos=new FileOutputStream(photo.getPath());
+
+                fos.write(da);
+                fos.close();
+            }
+            catch (java.io.IOException e) {
+                Toast.makeText(pro.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("users").child(user.getUid()).child("images");
+            StorageReference iref = storageRef;
+            Uri file = Uri.fromFile(new File(photo.getAbsolutePath()));
+            UploadTask uploadTask = iref.putFile(file);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                    Toast.makeText(pro.this, exception.getMessage()+photo.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    // ...
+                    Toast.makeText(pro.this,"Uploaded", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+            //  uploadImage();
         }
     }
     String currentPhotoPath;
@@ -101,6 +158,34 @@ public class pro extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_READ_EXTERNAL_STORAGE);
+            }
+        }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,83 +219,7 @@ public class pro extends AppCompatActivity {
         textEmail.setText(user.getEmail());
 
     }
-    private void uploadImage()
-    {
-        Uri fpath= Uri.fromFile(new File(currentPhotoPath));
-        if (fpath != null) {
 
-            // Code for showing progressDialog while uploading
-           // final ProgressDialog progressDialog = new ProgressDialog(this);
-            //progressDialog.setTitle("Uploading...");
-            //progressDialog.show();
-            StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("users").child(user.getUid());
-
-            // Defining the child of storageReference
-            StorageReference ref = storageReference.child(UUID.randomUUID().toString());
-
-            // adding listeners on upload
-            // or failure of image
-            ref.putFile(fpath)
-                    .addOnSuccessListener(
-                            new OnSuccessListener<UploadTask.TaskSnapshot>() {
-
-                                @Override
-                                public void onSuccess(
-                                        UploadTask.TaskSnapshot taskSnapshot)
-                                {
-
-                                    // Image uploaded successfully
-                                    // Dismiss dialog
-                                //    progressDialog.dismiss();
-                                    Toast
-                                            .makeText(pro.this,
-                                                    "Image Uploaded!!",
-                                                    Toast.LENGTH_SHORT).show();
-                                }
-                            })
-
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e)
-                        {
-
-                            // Error, Image not uploaded
-                        //    progressDialog.dismiss();
-                            Toast
-                                    .makeText(pro.this,
-                                            "Failed " + e.getMessage(),
-                                            Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-                    })
-                  /*
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-
-                                // Progress Listener for loading
-                                // percentage on the dialog box
-                                @Override
-                                public void onProgress(
-                                        UploadTask.TaskSnapshot taskSnapshot)
-                                {
-                                    double progress
-                                            = (100.0
-                                            * taskSnapshot.getBytesTransferred()
-                                            / taskSnapshot.getTotalByteCount());
-                                    progressDialog.setMessage(
-                                            "Uploaded "
-                                                    + (int)progress + "%");
-                                }
-
-
-                            })*/
-                  ;
-        }
-        Toast
-                .makeText(pro.this,
-                        "Failed " ,
-                        Toast.LENGTH_SHORT)
-                .show();
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

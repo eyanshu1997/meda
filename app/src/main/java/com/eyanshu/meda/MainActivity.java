@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 signIn();
             }
         });
+
     }
     @Override
     protected void onStart() {
