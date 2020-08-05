@@ -304,7 +304,8 @@ public class pro extends AppCompatActivity {
         ImageView imageView=(ImageView) navigationView.getHeaderView(0).findViewById(R.id.imageView);
         TextView textName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.username);
         TextView textEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.textViewEmail);
-        imageView.setImageURI(user.getPhotoUrl());
+        //imageView.setImageURI(user.getPhotoUrl());
+
         Glide.with(this).load(user.getPhotoUrl()).into(imageView);
         textName.setText(user.getDisplayName());
         textEmail.setText(user.getEmail());

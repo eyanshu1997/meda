@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.eyanshu.meda.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -79,12 +80,14 @@ public class GalleryFragment extends Fragment {
                     gD.setCornerRadius(15);
                     gD.setShape(GradientDrawable.RECTANGLE);
                     tags[i].setBackground(gD);
+
                     final int finalI = i;
                     x.getDownloadUrl()
                             .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    Glide.with(co).load(uri).into(tags[finalI]);
+                                    Glide.with(co).load(uri)
+                                            .apply(new RequestOptions().override(600, 200)).into(tags[finalI]);
 
                                     // Got the download URL for 'users/me/profile.png'
                                 }
@@ -94,6 +97,8 @@ public class GalleryFragment extends Fragment {
                             // Handle any errors
                         }
                     });
+                    tags[i].setMaxWidth(150);
+                    tags[i].setMaxHeight(150);
 
 
                     layoutParams.setMargins(10, 5, 10, 5);
