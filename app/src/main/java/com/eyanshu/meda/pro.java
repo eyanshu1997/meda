@@ -70,7 +70,7 @@ public class pro extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             ImageView im=findViewById(R.id.bitmark);
             im.setImageBitmap(imageBitmap);
-            uploadImage();
+          //  uploadImage();
         }
     }
     String currentPhotoPath;
@@ -88,6 +88,10 @@ public class pro extends AppCompatActivity {
 
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
+        Toast
+                .makeText(pro.this,
+                        "Image saved!"+currentPhotoPath,
+                        Toast.LENGTH_SHORT).show();
         return image;
     }
     @Override
@@ -136,10 +140,9 @@ public class pro extends AppCompatActivity {
         if (fpath != null) {
 
             // Code for showing progressDialog while uploading
-            final ProgressDialog progressDialog
-                    = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
+           // final ProgressDialog progressDialog = new ProgressDialog(this);
+            //progressDialog.setTitle("Uploading...");
+            //progressDialog.show();
             StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("users").child(user.getUid());
 
             // Defining the child of storageReference
@@ -158,7 +161,7 @@ public class pro extends AppCompatActivity {
 
                                     // Image uploaded successfully
                                     // Dismiss dialog
-                                    progressDialog.dismiss();
+                                //    progressDialog.dismiss();
                                     Toast
                                             .makeText(pro.this,
                                                     "Image Uploaded!!",
@@ -172,7 +175,7 @@ public class pro extends AppCompatActivity {
                         {
 
                             // Error, Image not uploaded
-                            progressDialog.dismiss();
+                        //    progressDialog.dismiss();
                             Toast
                                     .makeText(pro.this,
                                             "Failed " + e.getMessage(),
@@ -180,8 +183,8 @@ public class pro extends AppCompatActivity {
                                     .show();
                         }
                     })
-                    .addOnProgressListener(
-                            new OnProgressListener<UploadTask.TaskSnapshot>() {
+                  /*
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
 
                                 // Progress Listener for loading
                                 // percentage on the dialog box
@@ -197,7 +200,10 @@ public class pro extends AppCompatActivity {
                                             "Uploaded "
                                                     + (int)progress + "%");
                                 }
-                            });
+
+
+                            })*/
+                  ;
         }
         Toast
                 .makeText(pro.this,
