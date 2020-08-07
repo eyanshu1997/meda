@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="com.eyanshu.meda.ui.gallery.GalleryFragment"
+        android:name="com.eyanshu.meda.ui.prescription.PrescriptionFragment"
         android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_prescription" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.eyanshu.meda.ui.slideshow.SlideshowFragment"
+        android:name="com.eyanshu.meda.ui.insulin.InsulinFragment"
         android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_insulin" />
 </navigation>

@@ -13,6 +13,7 @@ public class insulin {
    FirebaseAuth mAuth;
 
     FirebaseUser user;
+    public insulin(){}
     public insulin( String value) {
         mAuth=FirebaseAuth.getInstance();
         user= mAuth.getCurrentUser();
@@ -24,7 +25,7 @@ public class insulin {
     public void upload()
     {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference("users").child(user.getUid()).push();
+        DatabaseReference ref = database.getReference("users").child(user.getUid()).child("insulin").push();
         ref.setValue(this);
     }
     String time;
@@ -37,6 +38,14 @@ public class insulin {
     //public void setUser(String user) {
        // this.user = user;
    // }
+
+    @Override
+    public String toString() {
+        return "insulin{" +
+                "time='" + time + '\'' +
+                ", Value=" + Value +
+                '}';
+    }
 
     public String getTime() {
         return time;
